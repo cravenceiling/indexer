@@ -2,51 +2,72 @@ package parser
 
 import (
 	"bufio"
-	"errors"
-	"fmt"
+	"io"
+	"log"
+	"net/mail"
 	"os"
 
-	"github.com/timetravel-1010/indexer/cli/internal/email"
+	"github.com/cravenceiling/indexer/cli/internal/email"
 )
-
-// A Document contains the path of the email and the email itself.
-type Document struct {
-	Path  string       `json:"path"` // path to the email.
-	Email email.EmailI `json:"email"`
-}
-
-// A Parser
-type ParserI interface {
-	Parse(string) (email.EmailI, error)
-}
 
 type Parser struct{}
 
-// Parse parses the txt email file into the Email structure.
-// If there is an error, it will be of type *PathError.
-func (p Parser) Parse(filePath string) (email.EmailI, error) {
-	eb := email.NewEmailBuilder()
+var isValidHeader = map[string]bool{
+	"Message-Id": true,
+	"Date":       true,
+	"From":       true,
+	"To":         true,
+	"Subject":    true,
+	"Cc":         true,
+	"Bcc":        true,
+}
 
+// Parse
+func (p Parser) Parse(filePath string) (*email.Email, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil, errors.New("Error opening the file")
+		return nil, err
 	}
+
 	defer file.Close()
+	reader := bufio.NewReader(file)
 
-	scanner := bufio.NewScanner(file)
-
-	// Check if the file is an email
-	scanner.Scan()
-	line := scanner.Text()
-	eb.SaveLine(&line, filePath)
-	isEmail := eb.MessageID.Len() != 0
-	if !isEmail {
-		return nil, errors.New(fmt.Sprintf("the file %s is not an email", filePath))
+	msg, err := mail.ReadMessage(reader)
+	if err != nil {
+		return nil, err
 	}
 
-	for scanner.Scan() {
-		line := scanner.Text()
-		eb.SaveLine(&line, filePath)
+	email, err := getEmail(msg)
+	if err != nil {
+		return nil, err
 	}
-	return eb.Build(), nil
+
+	return email, nil
+}
+
+// getEmail
+func getEmail(msg *mail.Message) (*email.Email, error) {
+	em := email.Email{}
+	var err error
+
+	for k := range msg.Header {
+		if isValidHeader[k] {
+			em[k] = msg.Header.Get(k)
+		}
+	}
+
+	content, err := io.ReadAll(msg.Body)
+	if err != nil {
+		log.Printf("error reading body: %v", err)
+	}
+	em["Body"] = string(content)
+
+	//buf := &bytes.Buffer{}
+	//if _, err = io.Copy(buf, msg.Body); err != nil {
+	//	return nil, err
+	//}
+
+	//em["Body"] = buf.String()
+
+	return &em, nil
 }

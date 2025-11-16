@@ -2,12 +2,12 @@ package program
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
-	"github.com/timetravel-1010/indexer/cli/internal/parser"
+	"github.com/cravenceiling/indexer/cli/internal/document"
 )
 
 type Credentials struct {
@@ -32,11 +32,17 @@ type IndexAction struct {
 }
 
 type Payload struct {
-	Index        string            `json:"index"`
-	DocumentData []parser.Document `json:"records"`
+	Index        string              `json:"index"`
+	DocumentData []document.Document `json:"records"`
 }
 
-var client = &http.Client{}
+var client = &http.Client{
+	Transport: &http.Transport{
+		MaxIdleConns:        10,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     30 * time.Second,
+	},
+}
 
 // Upload
 func Upload(re HttpRequest, payload *bytes.Buffer) error {
@@ -60,7 +66,7 @@ func Upload(re HttpRequest, payload *bytes.Buffer) error {
 	}
 
 	if res.StatusCode != 200 {
-		return errors.New(fmt.Sprintf("status code: %d - %s\n", res.StatusCode, body))
+		return fmt.Errorf("status code: %d - %s\n", res.StatusCode, body)
 	}
 
 	payload.Reset()

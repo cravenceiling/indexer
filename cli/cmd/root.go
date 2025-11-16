@@ -2,14 +2,10 @@ package cmd
 
 import (
 	"flag"
-	"log"
 
-	"github.com/timetravel-1010/indexer/cli/cmd/program"
-	"github.com/timetravel-1010/indexer/cli/internal/parser"
-	"github.com/timetravel-1010/indexer/cli/internal/stdparser"
+	"github.com/cravenceiling/indexer/cli/cmd/program"
+	"github.com/cravenceiling/indexer/cli/internal/parser"
 )
-
-var useCustomImpl *bool
 
 var (
 	flags   = Flags{}
@@ -27,7 +23,7 @@ type Flags struct {
 }
 
 func Execute() {
-	re := program.HttpRequest{
+	req := program.HttpRequest{
 		Creds: program.Credentials{
 			User:     *flags.user,
 			Password: *flags.password,
@@ -38,14 +34,8 @@ func Execute() {
 		Port:    *flags.port,
 	}
 
-	if !*useCustomImpl {
-		log.Println("using std")
-		indexer.Parser = stdparser.StdParser{}
-	} else {
-		log.Println("using custom")
-		indexer.Parser = parser.Parser{}
-	}
-	indexer.Index(*flags.directory, re)
+	indexer.Parser = parser.Parser{}
+	indexer.Index(*flags.directory, req)
 }
 
 func init() {
@@ -56,7 +46,6 @@ func init() {
 	flags.password = flag.String("password", "Complexpass#123", "zincsearch password")
 	flags._index = flag.String("index", "enron", "index name")
 	flags._type = flag.String("type", "_doc", "request payload type")
-	useCustomImpl = flag.Bool("custom", false, "use custom implementation instead of std (net/mail) library")
 
 	flag.Parse()
 }

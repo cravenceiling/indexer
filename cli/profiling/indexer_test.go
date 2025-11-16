@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/timetravel-1010/indexer/cli/cmd/program"
-	"github.com/timetravel-1010/indexer/cli/internal/parser"
+	"github.com/cravenceiling/indexer/cli/cmd/program"
+	"github.com/cravenceiling/indexer/cli/internal/parser"
 )
 
 var (
@@ -26,7 +26,7 @@ var (
 )
 
 func BenchmarkXxx(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		indexer.Index(directory, re)
 	}
 }

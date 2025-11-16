@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/timetravel-1010/indexer/cli/internal/parser"
+	"github.com/cravenceiling/indexer/cli/internal/parser"
 )
 
 var (
@@ -20,8 +20,8 @@ var (
 		Port:    "4080",
 	}
 
-	directory = "../enron_mail_20110402"
-	indexer   = Indexer{
+	//directory = "../enron_mail_20110402"
+	indexer = Indexer{
 		Parser: parser.Parser{},
 	}
 )
@@ -35,17 +35,22 @@ func TestIndexLargeEmail(t *testing.T) {
 	if em == nil {
 		t.Fatalf("The file %s is empty or does not correspond to an email.", "big-email.txt")
 	}
+
 	buf := &bytes.Buffer{}
 
-	json.NewEncoder(buf).Encode(IndexAction{
-		Index: IndexDocument{
-			Index: re.Index,
-		},
-	})
-	json.NewEncoder(buf).Encode(em)
-	err = Upload(re, buf)
+	action := IndexAction{Index: IndexDocument{
+		Index: re.Index,
+	}}
 
-	if err != nil {
+	if err := json.NewEncoder(buf).Encode(action); err != nil {
+		t.Fatalf("error encoding the index action: %v", err)
+	}
+
+	if err = json.NewEncoder(buf).Encode(em); err != nil {
+		t.Fatalf("error encoding the email: %v", err)
+	}
+
+	if err = Upload(re, buf); err != nil {
 		t.Fatalf("error uploading the email: %v", err)
 	}
 }
