@@ -2,22 +2,29 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
-	"github.com/timetravel-1010/indexer/api/internal/zinc"
+	"github.com/cravenceiling/indexer/api/internal/zinc"
 )
 
-type EmailHandler struct{}
+type EmailHandler struct {
+	zinc *zinc.Client
+}
 
-var (
-	c = zinc.Config{
-		Host:     "localhost",
-		Port:     "4080",
-		Username: "admin",
-		Password: "Complexpass#123",
+func NewEmailHandler() *EmailHandler {
+	z := zinc.NewClient()
+	if err := z.PingDB(); err != nil {
+		log.Fatalf("error initializing zinc client: %v", err)
 	}
-)
+
+	log.Println("connection to zincsearch established!")
+
+	return &EmailHandler{
+		zinc: z,
+	}
+}
 
 // SearchByTerm
 func (eh EmailHandler) SearchByTerm(w http.ResponseWriter, req *http.Request) {
@@ -25,18 +32,23 @@ func (eh EmailHandler) SearchByTerm(w http.ResponseWriter, req *http.Request) {
 		Params:     req.URL.Query(),
 		SearchType: zinc.MATCH_QUERY,
 	})
+
+	fmt.Println("query: ", query)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Fatal(err)
+		log.Println(err)
 	}
 
-	res, err := zinc.DoZincRequest(req, query, c)
+	res, err := eh.zinc.DoZincRequest(req, query)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Fatal(err)
+		log.Println(err)
 	}
 
-	json.NewEncoder(w).Encode(res)
+	if err = json.NewEncoder(w).Encode(res); err != nil {
+		log.Println(err)
+	}
 }
 
 // GetEmails
@@ -45,16 +57,19 @@ func (eh EmailHandler) GetEmails(w http.ResponseWriter, req *http.Request) {
 		Params:     req.URL.Query(),
 		SearchType: zinc.MATCHALL_QUERY,
 	})
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Fatal(err)
+		log.Println(err)
 	}
 
-	res, err := zinc.DoZincRequest(req, query, c)
+	res, err := eh.zinc.DoZincRequest(req, query)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Fatal(err)
+		log.Println(err)
 	}
-	log.Println("entra en GET /emails")
-	json.NewEncoder(w).Encode(res)
+
+	if err = json.NewEncoder(w).Encode(res); err != nil {
+		log.Println(err)
+	}
 }

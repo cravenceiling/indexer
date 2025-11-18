@@ -1,7 +1,6 @@
 package zinc
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -58,14 +57,14 @@ func BuildQuery(zq ZincQuery) (q string, err error) {
 		return buildMatchAllQuery(zq.Params)
 	}
 
-	return "", errors.New(fmt.Sprintf("invalid SearchType %s", zq.SearchType))
+	return "", fmt.Errorf("invalid SearchType %s", zq.SearchType)
 }
 
 // getParams
 func getParams(params map[string][]string, toGet []string) (p []any, err error) {
 	for _, tg := range toGet {
 		if params[tg] == nil {
-			return nil, errors.New(fmt.Sprintf("missing param %s", tg))
+			return nil, fmt.Errorf("missing param %s", tg)
 		}
 		urlParam := params[tg][0]
 		p = append(p, urlParam)

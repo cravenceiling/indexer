@@ -3,10 +3,10 @@ package server
 import (
 	"net/http"
 
+	"github.com/cravenceiling/indexer/api/internal/handlers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/timetravel-1010/indexer/api/internal/handlers"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -29,7 +29,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 func EmailRoutes() chi.Router {
 	r := chi.NewRouter()
-	emailHandler := handlers.EmailHandler{}
+	emailHandler := handlers.NewEmailHandler()
 
 	r.Get("/", emailHandler.GetEmails)
 	r.Get("/search", emailHandler.SearchByTerm)
