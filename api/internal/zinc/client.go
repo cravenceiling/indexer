@@ -75,8 +75,6 @@ func (c *Client) DoZincRequest(r *http.Request, query string) (*ZincResponse, er
 		Path:   fmt.Sprintf("/api/%s/_search", index),
 	}
 
-	fmt.Println("url:", url.String())
-
 	req, err := http.NewRequest("POST", url.String(), strings.NewReader(query))
 	if err != nil {
 		return nil, err

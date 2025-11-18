@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -32,9 +31,6 @@ func (eh EmailHandler) SearchByTerm(w http.ResponseWriter, req *http.Request) {
 		Params:     req.URL.Query(),
 		SearchType: zinc.MATCH_QUERY,
 	})
-
-	fmt.Println("query: ", query)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Println(err)
