@@ -1,30 +1,24 @@
 <script setup lang="ts">
-import EmailInbox from './components/EmailInbox.vue';
-import MainHeader from './components/MainHeader.vue';
-
-import { ref } from 'vue';
-
-const emailInbox = ref();
-
-const setTerm = (term: string) => {
-  emailInbox.value.searchEmails(term);
-};
+import AppHeader from './components/AppHeader.vue'
+import ContentPane from './components/ContentPane.vue'
+import InboxTable from './components/InboxTable.vue'
 </script>
 
 <template>
   <div class="h-screen flex flex-col">
-    <!-- Header: Responsive Spacing and Layout -->
-    <header>
-      <MainHeader @on-search="setTerm" class="px-4 sm:px-6 md:px-8" />
-    </header>
+    <AppHeader />
 
-    <!-- Main Content Area: Adjust Layout for Small and Large Screens -->
-    <div class="flex-1 flex flex-col lg:flex-row overflow-x-hidden">
-      <!-- Email Inbox -->
-      <main class="flex-1 w-full p-4 sm:p-6 lg:p-8 space-y-6">
-        <EmailInbox ref="emailInbox" />
-      </main>
-    </div>
+    <main class="flex-1 w-full p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+      <div class="flex flex-col md:flex-row w-full h-full">
+        <div class="w-full md:w-1/2 h-full">
+          <InboxTable />
+        </div>
+
+        <div class="w-full md:w-1/2 h-full p-4">
+          <ContentPane />
+        </div>
+      </div>
+    </main>
   </div>
 </template>
 
