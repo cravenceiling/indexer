@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useEmails } from '@/composables/useEmails'
+import { useEmails } from '@/composables/useEmails';
 
-const { selectedEmail } = useEmails()
+const { selectedEmail } = useEmails();
 </script>
 
 <template>

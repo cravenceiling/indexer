@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { useEmails } from '@/composables/useEmails'
-import { ref } from 'vue'
+import { useEmails } from '@/composables/useEmails';
+import { ref } from 'vue';
 
-const term = ref('')
-const { searchEmails } = useEmails()
+const term = ref('');
+const { searchEmails } = useEmails();
 
 const handleSearch = async () => {
-  console.log('search term', term.value)
-  await searchEmails(term.value)
-}
+  console.log('search term', term.value);
+  await searchEmails(term.value);
+};
 </script>
 
 <template>

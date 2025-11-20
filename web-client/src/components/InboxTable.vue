@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { useEmails } from '@/composables/useEmails'
-import { computed, ref } from 'vue'
-import { CalendarDaysIcon } from '@heroicons/vue/24/outline'
+import { useEmails } from '@/composables/useEmails';
+import { computed, ref } from 'vue';
+import { CalendarDaysIcon } from '@heroicons/vue/24/outline';
 
-const { emails, error, isLoading, selectEmail } = useEmails()
+const { emails, error, isLoading, selectEmail } = useEmails();
 
-const hasEmails = computed(() => emails.value.length > 0)
+const hasEmails = computed(() => emails.value.length > 0);
 
-const sortOrder = ref<'asc' | 'desc'>('desc')
+const sortOrder = ref<'asc' | 'desc'>('desc');
 
 const sortByDate = () => {
-  console.log('Sort by date')
+  console.log('Sort by date');
   if (sortOrder.value === 'desc') {
     emails.value.sort(
-      (a, b) => new Date(b._source.email.date).getTime() - new Date(a._source.email.date).getTime()
-    )
-    sortOrder.value = 'asc'
+      (a, b) => new Date(b._source.email.date).getTime() - new Date(a._source.email.date).getTime(),
+    );
+    sortOrder.value = 'asc';
   } else {
     emails.value.sort(
-      (a, b) => new Date(a._source.email.date).getTime() - new Date(b._source.email.date).getTime()
-    )
-    sortOrder.value = 'desc'
+      (a, b) => new Date(a._source.email.date).getTime() - new Date(b._source.email.date).getTime(),
+    );
+    sortOrder.value = 'desc';
   }
-}
+};
 </script>
 
 <template>

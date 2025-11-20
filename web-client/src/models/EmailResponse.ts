@@ -1,7 +1,7 @@
-import type { Hit } from './Hit'
+import type { Hit } from './Hit';
 
 export interface EmailResponse {
   hits: {
-    hits: Hit[]
-  }
+    hits: Hit[];
+  };
 }

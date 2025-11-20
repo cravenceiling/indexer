@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import AppHeader from './components/AppHeader.vue'
-import ContentPane from './components/ContentPane.vue'
-import InboxTable from './components/InboxTable.vue'
+import AppHeader from './components/AppHeader.vue';
+import ContentPane from './components/ContentPane.vue';
+import InboxTable from './components/InboxTable.vue';
 </script>
 
 <template>
