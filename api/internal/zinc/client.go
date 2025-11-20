@@ -76,7 +76,6 @@ func (c *Client) DoZincRequest(r *http.Request, query matchQuery) (*ZincResponse
 		log.Println(err)
 		return nil, err
 	}
-	log.Println("query: ", string(body))
 
 	req, err := http.NewRequest("POST", url.String(), bytes.NewReader(body))
 	if err != nil {
