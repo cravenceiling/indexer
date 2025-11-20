@@ -27,36 +27,18 @@ func NewEmailHandler() *EmailHandler {
 
 // SearchByTerm
 func (eh EmailHandler) SearchByTerm(w http.ResponseWriter, req *http.Request) {
-	query, err := zinc.BuildQuery(zinc.ZincQuery{
-		Params:     req.URL.Query(),
-		SearchType: zinc.MATCH_QUERY,
-	})
+	query, err := zinc.BuildMatchQuery(req.URL.Query())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Println(err)
 	}
 
-	res, err := eh.zinc.DoZincRequest(req, query)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err)
-	}
-
-	if err = json.NewEncoder(w).Encode(res); err != nil {
-		log.Println(err)
-	}
-}
-
-// GetEmails
-func (eh EmailHandler) GetEmails(w http.ResponseWriter, req *http.Request) {
-	query, err := zinc.BuildQuery(zinc.ZincQuery{
-		Params:     req.URL.Query(),
-		SearchType: zinc.MATCHALL_QUERY,
-	})
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err)
+	// Check if index exists
+	index := req.URL.Query().Get("index")
+	if index == "" {
+		http.Error(w, "index is required", http.StatusBadRequest)
+		log.Println("index is required")
+		return
 	}
 
 	res, err := eh.zinc.DoZincRequest(req, query)

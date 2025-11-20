@@ -1,20 +1,16 @@
 package zinc
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/cravenceiling/indexer/api/internal/config"
 	_ "github.com/joho/godotenv/autoload"
-)
-
-const (
-	DEFAULT_PAGE_SIZE = 10
 )
 
 // ZincSearch Client
@@ -67,7 +63,7 @@ func (c *Client) PingDB() error {
 }
 
 // DoZincRequest
-func (c *Client) DoZincRequest(r *http.Request, query string) (*ZincResponse, error) {
+func (c *Client) DoZincRequest(r *http.Request, query matchQuery) (*ZincResponse, error) {
 	index := r.URL.Query().Get("index")
 	url := url.URL{
 		Scheme: "http",
@@ -75,8 +71,16 @@ func (c *Client) DoZincRequest(r *http.Request, query string) (*ZincResponse, er
 		Path:   fmt.Sprintf("/api/%s/_search", index),
 	}
 
-	req, err := http.NewRequest("POST", url.String(), strings.NewReader(query))
+	body, err := json.Marshal(query)
 	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	log.Println("query: ", string(body))
+
+	req, err := http.NewRequest("POST", url.String(), bytes.NewReader(body))
+	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -89,10 +93,9 @@ func (c *Client) DoZincRequest(r *http.Request, query string) (*ZincResponse, er
 
 	resp, err := c.http.Do(req)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
-
-	log.Println(resp.StatusCode)
 
 	zr := &ZincResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&zr)

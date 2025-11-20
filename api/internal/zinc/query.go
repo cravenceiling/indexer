@@ -1,93 +1,61 @@
 package zinc
 
 import (
-	"fmt"
+	"net/url"
+	"strconv"
 )
 
-// ZincQuery
-type ZincQuery struct {
-	Params     map[string][]string
-	SearchType ZincSearchType
+type Query struct {
+	Term  string `json:"term"`
+	Field string `json:"field"`
 }
 
-type ZincSearchType string
-
-const (
-	MATCH_QUERY    ZincSearchType = "match"
-	MATCHALL_QUERY ZincSearchType = "matchall"
-)
-
-var (
-	requiredParams = []string{
-		"page",
-	}
-
-	matchQueryParams = append([]string{
-		"term",
-	}, requiredParams...)
-
-	matchAllQueryParams = append([]string{}, requiredParams...)
-
-	matchAllQueryTempl = []byte(`{
-        "search_type": "matchall",
-        "from": 0,
-        "max_results": %v,
-        "_source": []
-    }`)
-
-	matchQueryTempl = []byte(`{
-        "search_type": "match",
-        "query": {
-            "term": "%v",
-            "field": "_all"
-        },
-        "sort_fields": ["-@timestamp"],
-        "from": 0,
-        "max_results": %v,
-        "_source": [ ]
-    }`)
-)
-
-// BuildQuery
-func BuildQuery(zq ZincQuery) (q string, err error) {
-	switch zq.SearchType {
-	case MATCH_QUERY:
-		return buildMatchQuery(zq.Params)
-	case MATCHALL_QUERY:
-		return buildMatchAllQuery(zq.Params)
-	}
-
-	return "", fmt.Errorf("invalid SearchType %s", zq.SearchType)
+type matchQuery struct {
+	Query      Query    `json:"query"`
+	SearchType string   `json:"search_type"`
+	SortFields []string `json:"sort_fields"`
+	From       int      `json:"from"`
+	MaxResults int      `json:"max_results"`
+	Source     []string `json:"_source"`
 }
 
-// getParams
-func getParams(params map[string][]string, toGet []string) (p []any, err error) {
-	for _, tg := range toGet {
-		if params[tg] == nil {
-			return nil, fmt.Errorf("missing param %s", tg)
-		}
-		urlParam := params[tg][0]
-		p = append(p, urlParam)
+func NewMatchQuery(term string) matchQuery {
+	return matchQuery{
+		Query: Query{
+			Term:  term,
+			Field: "_all",
+		},
+		SearchType: "match",
+		SortFields: []string{"-@timestamp"},
+		From:       0,
+		MaxResults: 10,
+		Source:     []string{},
 	}
-	return p, nil
 }
 
 // buildMatchQuery
-func buildMatchQuery(params map[string][]string) (q string, err error) {
-	urlParams, err := getParams(params, matchQueryParams)
-	if err != nil {
-		return "", err
-	}
-	q = fmt.Sprintf(string(matchQueryTempl), urlParams...)
-	return q, err
-}
+func BuildMatchQuery(params url.Values) (matchQuery, error) {
+	term := params.Get("term")
 
-// buildMatchAllQuery
-func buildMatchAllQuery(params map[string][]string) (q string, err error) {
-	urlParams, err := getParams(params, matchAllQueryParams)
-	if err != nil {
-		return "", err
+	query := NewMatchQuery(term)
+
+	page := params.Get("page")
+	if page != "" {
+		pageInt, err := strconv.Atoi(page)
+		if err != nil {
+			return matchQuery{}, err
+		}
+		query.From = pageInt
 	}
-	q = fmt.Sprintf(string(matchAllQueryTempl), urlParams...)
-	return q, nil
+
+	limit := params.Get("limit")
+	if limit != "" {
+		limitInt, err := strconv.Atoi(limit)
+		if err != nil {
+			return matchQuery{}, err
+		}
+		query.MaxResults = limitInt
+	}
+
+	return query, nil
 }

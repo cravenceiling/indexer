@@ -15,7 +15,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
@@ -31,7 +31,6 @@ func EmailRoutes() chi.Router {
 	r := chi.NewRouter()
 	emailHandler := handlers.NewEmailHandler()
 
-	r.Get("/", emailHandler.GetEmails)
 	r.Get("/search", emailHandler.SearchByTerm)
 
 	return r
