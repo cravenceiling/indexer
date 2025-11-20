@@ -6,7 +6,7 @@ const { selectedEmail } = useEmails();
 
 <template>
   <div class="overflow-y-auto h-full">
-    <div class="text-sm">
+    <div class="text-sm h-full">
       <div v-if="selectedEmail" class="flex flex-col h-full w-full space-y-4">
         <p class=""><strong>Subject:</strong> {{ selectedEmail._source.email.subject }}</p>
         <p class=""><strong>From:</strong> {{ selectedEmail._source.email.from }}</p>
